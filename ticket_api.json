@@ -1,0 +1,1329 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "description": "APIs for retrieving and closing tickets for an organization.\n",
+    "title": "Ticket API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "description": "US001",
+      "url": "https://ticket-api.managedgw.us001-prod.arcticwolf.net"
+    },
+    {
+      "description": "US002",
+      "url": "https://ticket-api.managedgw.us002-prod.arcticwolf.net"
+    },
+    {
+      "description": "US003",
+      "url": "https://ticket-api.managedgw.us003-prod.arcticwolf.net"
+    },
+    {
+      "description": "EU001",
+      "url": "https://ticket-api.managedgw.eu001-prod.arcticwolf.net"
+    },
+    {
+      "description": "AU001",
+      "url": "https://ticket-api.managedgw.au001-prod.arcticwolf.net"
+    },
+    {
+      "description": "CA001",
+      "url": "https://ticket-api.managedgw.ca001-prod.arcticwolf.net"
+    }
+  ],
+  "paths": {
+    "/api/v1/organizations/{organizationUuid}/tickets": {
+      "get": {
+        "summary": "List tickets for an organization",
+        "description": "Retrieve a paginated list of tickets for a specific organization",
+        "operationId": "listTickets",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ticket"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Status"
+          },
+          {
+            "$ref": "#/components/parameters/AssigneeByEmail"
+          },
+          {
+            "$ref": "#/components/parameters/AssigneeByFirstName"
+          },
+          {
+            "$ref": "#/components/parameters/AssigneeByLastName"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/Priority"
+          },
+          {
+            "$ref": "#/components/parameters/Type"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeComments"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PaginatedListTickets"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/tickets/{ticketId}": {
+      "get": {
+        "summary": "Get a ticket by ID",
+        "description": "Retrieve detailed information about a specific ticket",
+        "operationId": "getTicketById",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ticket"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationUuid"
+          },
+          {
+            "$ref": "#/components/parameters/TicketId"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeComments"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TicketResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/tickets/{ticketId}/close": {
+      "post": {
+        "summary": "Close a ticket",
+        "description": "Close a ticket with an optional comment",
+        "operationId": "closeTicket",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ticket"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationUuid"
+          },
+          {
+            "$ref": "#/components/parameters/TicketId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CloseTicketRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CloseTicketResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/tickets/{ticketId}/comments": {
+      "post": {
+        "summary": "Add a comment to a ticket",
+        "description": "Add a new comment to an existing ticket",
+        "operationId": "addCommentToTicket",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Comment"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationUuid"
+          },
+          {
+            "$ref": "#/components/parameters/TicketId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/AddCommentRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AddCommentResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/tickets/{ticketId}/attachments/{attachmentId}": {
+      "get": {
+        "summary": "Download an attachment",
+        "description": "Get a presigned URL to download a ticket attachment",
+        "operationId": "getAttachment",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Attachment"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationUuid"
+          },
+          {
+            "$ref": "#/components/parameters/TicketId"
+          },
+          {
+            "$ref": "#/components/parameters/AttachmentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AttachmentURLResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "OrganizationUuid": {
+        "in": "path",
+        "name": "organizationUuid",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "minLength": 36,
+          "maxLength": 36
+        },
+        "description": "The unique identifier for the organization",
+        "examples": {
+          "uuid": {
+            "value": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        }
+      },
+      "TicketId": {
+        "in": "path",
+        "name": "ticketId",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 1,
+          "maximum": 9223372036854776000
+        },
+        "description": "The unique identifier for the ticket",
+        "examples": {
+          "ticketId": {
+            "value": 12345
+          }
+        }
+      },
+      "AttachmentId": {
+        "in": "path",
+        "name": "attachmentId",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 1,
+          "maximum": 9223372036854776000
+        },
+        "description": "The unique identifier for the attachment",
+        "examples": {
+          "attachmentId": {
+            "value": 70001
+          }
+        }
+      },
+      "Status": {
+        "in": "query",
+        "name": "status",
+        "description": "Filter by ticket status(es). Provide single value or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "status": {
+            "value": [
+              "OPEN",
+              "PENDING"
+            ]
+          }
+        }
+      },
+      "AssigneeByEmail": {
+        "in": "query",
+        "name": "assigneeByEmail",
+        "description": "Filter by assignee email(s). Provide single email or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "minLength": 3,
+            "maxLength": 254
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 50
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "email": {
+            "value": [
+              "agent@example.com",
+              "agent2@example.com"
+            ]
+          }
+        }
+      },
+      "AssigneeByFirstName": {
+        "in": "query",
+        "name": "assigneeByFirstName",
+        "description": "Filter by assignee first name(s). Provide single name or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s\\-\\.,\\']+$",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 50
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "firstName": {
+            "value": [
+              "John",
+              "Jane"
+            ]
+          }
+        }
+      },
+      "AssigneeByLastName": {
+        "in": "query",
+        "name": "assigneeByLastName",
+        "description": "Filter by assignee last name(s). Provide single name or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s\\-\\.,\\']+$",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 50
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "lastName": {
+            "value": [
+              "Doe",
+              "Smith"
+            ]
+          }
+        }
+      },
+      "UpdatedBefore": {
+        "in": "query",
+        "name": "updatedBefore",
+        "description": "Filter tickets that were last updated before this timestamp (ISO 8601, UTC)",
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+          "minLength": 19,
+          "maxLength": 29
+        },
+        "examples": {
+          "timestamp": {
+            "value": "2026-03-04T14:00:00Z"
+          }
+        }
+      },
+      "UpdatedAfter": {
+        "in": "query",
+        "name": "updatedAfter",
+        "description": "Filter tickets that were last updated after this timestamp (ISO 8601, UTC)",
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+          "minLength": 19,
+          "maxLength": 29
+        },
+        "examples": {
+          "timestamp": {
+            "value": "2026-03-01T00:00:00Z"
+          }
+        }
+      },
+      "CreatedBefore": {
+        "in": "query",
+        "name": "createdBefore",
+        "description": "Filter tickets that were created before this timestamp (ISO 8601, UTC)",
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+          "minLength": 19,
+          "maxLength": 29
+        },
+        "examples": {
+          "timestamp": {
+            "value": "2026-03-04T23:59:59Z"
+          }
+        }
+      },
+      "CreatedAfter": {
+        "in": "query",
+        "name": "createdAfter",
+        "description": "Filter tickets that were created after this timestamp (ISO 8601, UTC)",
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+          "minLength": 19,
+          "maxLength": 29
+        },
+        "examples": {
+          "timestamp": {
+            "value": "2026-02-01T00:00:00Z"
+          }
+        }
+      },
+      "Priority": {
+        "in": "query",
+        "name": "priority",
+        "description": "Filter by priority level(s). Provide single value or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Priority"
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "priority": {
+            "value": [
+              "HIGH",
+              "URGENT"
+            ]
+          }
+        }
+      },
+      "Type": {
+        "in": "query",
+        "name": "type",
+        "description": "Filter by ticket type(s). Provide single value or comma-separated list.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TicketType"
+          },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "style": "form",
+        "explode": false,
+        "examples": {
+          "type": {
+            "value": [
+              "INCIDENT",
+              "PROBLEM"
+            ]
+          }
+        }
+      },
+      "Offset": {
+        "in": "query",
+        "name": "offset",
+        "description": "Number of items to skip before starting to return results",
+        "schema": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "examples": {
+          "offset": {
+            "value": 0
+          }
+        }
+      },
+      "Limit": {
+        "in": "query",
+        "name": "limit",
+        "description": "Maximum number of items to return",
+        "schema": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
+        },
+        "examples": {
+          "limit": {
+            "value": 20
+          }
+        }
+      },
+      "IncludeComments": {
+        "in": "query",
+        "name": "includeComments",
+        "description": "Whether to include comments & attachments in the response",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "examples": {
+          "includeComments": {
+            "value": false
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "CloseTicketRequest": {
+        "description": "Comment for closing a ticket",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CloseTicketRequest"
+            }
+          }
+        }
+      },
+      "AddCommentRequest": {
+        "description": "Add comment to a ticket",
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AddCommentRequest"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "PaginatedListTickets": {
+        "description": "A paginated list of tickets",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PaginatedListTickets"
+            },
+            "examples": {
+              "success": {
+                "$ref": "#/components/examples/TicketListExample"
+              }
+            }
+          }
+        }
+      },
+      "TicketResponse": {
+        "description": "Ticket details",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Ticket"
+            },
+            "examples": {
+              "success": {
+                "$ref": "#/components/examples/TicketOpenExample"
+              }
+            }
+          }
+        }
+      },
+      "CloseTicketResponse": {
+        "description": "Ticket successfully closed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Ticket"
+            },
+            "examples": {
+              "closedTicket": {
+                "$ref": "#/components/examples/TicketClosedExample"
+              }
+            }
+          }
+        }
+      },
+      "AttachmentURLResponse": {
+        "description": "URL to download the attachment",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AttachmentURL"
+            },
+            "examples": {
+              "attachmentURL": {
+                "$ref": "#/components/examples/AttachmentURLExample"
+              }
+            }
+          }
+        }
+      },
+      "AddCommentResponse": {
+        "description": "Comment successfully added to ticket",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Comment"
+            },
+            "examples": {
+              "addedComment": {
+                "$ref": "#/components/examples/CommentAddedExample"
+              }
+            }
+          }
+        }
+      },
+      "UnexpectedError": {
+        "description": "Unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequestError": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "badRequest": {
+                "value": {
+                  "code": "invalid_request",
+                  "description": "The 'limit' parameter must be less than or equal to 100."
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Authentication required or token invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "unauthorized": {
+                "value": {
+                  "code": "unauthorized",
+                  "description": "Invalid or expired authentication token."
+                }
+              }
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "Authenticated but insufficient permissions",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "forbidden": {
+                "value": {
+                  "code": "forbidden",
+                  "description": "Insufficient permissions to access this resource."
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Ticket not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "notFound": {
+                "value": {
+                  "code": "not_found",
+                  "description": "Ticket with ID 12345 was not found."
+                }
+              },
+              "attachmentNotFound": {
+                "value": {
+                  "code": "not_found",
+                  "description": "Attachment with ID 123 belonging to Ticket with ID 456 was not found."
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "internalError": {
+                "value": {
+                  "code": "internal_server_error",
+                  "description": "An unexpected error occurred while processing your request."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "TicketStatus": {
+        "type": "string",
+        "description": "Ticket status mapping with Unified Portal: OPEN, NEW, HOLD -> With Arctic Wolf; PENDING -> With Customer; CLOSED -> Closed; OPEN, NEW, HOLD, PENDING -> Open.",
+        "enum": [
+          "OPEN",
+          "NEW",
+          "PENDING",
+          "HOLD",
+          "CLOSED"
+        ],
+        "minLength": 3,
+        "maxLength": 7
+      },
+      "Priority": {
+        "type": "string",
+        "description": "Priority level for the ticket",
+        "enum": [
+          "LOW",
+          "NORMAL",
+          "HIGH",
+          "URGENT"
+        ],
+        "minLength": 3,
+        "maxLength": 6
+      },
+      "TicketType": {
+        "type": "string",
+        "description": "Type of ticket",
+        "enum": [
+          "QUESTION",
+          "INCIDENT",
+          "PROBLEM",
+          "TASK"
+        ],
+        "minLength": 4,
+        "maxLength": 8
+      },
+      "CommentType": {
+        "type": "string",
+        "description": "Type of comment",
+        "enum": [
+          "PUBLIC",
+          "INTERNAL"
+        ],
+        "minLength": 6,
+        "maxLength": 8
+      },
+      "Ticket": {
+        "type": "object",
+        "description": "Represents a support ticket",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9223372036854776000,
+            "description": "Unique identifier for the ticket"
+          },
+          "title": {
+            "type": "string",
+            "description": "Brief summary of the ticket issue",
+            "pattern": "^[\\s\\S]*$",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the ticket issue",
+            "pattern": "^[\\s\\S]*$",
+            "minLength": 1,
+            "maxLength": 65535
+          },
+          "organizationUuid": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36,
+            "description": "UUID of the organization this ticket belongs to"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus",
+            "description": "Current status of the ticket"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/User",
+            "description": "The assignee maps to the Assigned To field in the Arctic Wolf Unified Portal."
+          },
+          "priority": {
+            "$ref": "#/components/schemas/Priority",
+            "description": "Priority level of the ticket"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TicketType",
+            "description": "Type of the ticket"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+            "minLength": 19,
+            "maxLength": 29,
+            "description": "Timestamp when the ticket was created (ISO 8601, UTC)"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+            "minLength": 19,
+            "maxLength": 29,
+            "description": "Timestamp when the ticket was last updated (ISO 8601, UTC)"
+          },
+          "commentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Total number of comments on the ticket (includes all comments)"
+          },
+          "attachmentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Total number of non-deleted attachments on the ticket"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            },
+            "minItems": 0,
+            "maxItems": 10000,
+            "description": "List of comments (included if requested)"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "minItems": 0,
+            "maxItems": 1000,
+            "description": "List of attachments"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "description": "Represents a comment on a ticket",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9223372036854776000,
+            "description": "Unique identifier for the comment"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65535,
+            "pattern": "^[\\s\\S]*$",
+            "description": "Comment body text (maximum 65535 characters)"
+          },
+          "author": {
+            "$ref": "#/components/schemas/User",
+            "description": "User who authored the comment"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+            "minLength": 19,
+            "maxLength": 29,
+            "description": "Timestamp when the comment was created (ISO 8601, UTC)"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CommentType",
+            "description": "Indicates whether the comment is public or internal"
+          }
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "description": "Represents a file attachment on a ticket or comment",
+        "required": [
+          "id",
+          "deleted"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9223372036854776000,
+            "description": "Unique identifier for the attachment"
+          },
+          "commentId": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 9223372036854776000,
+            "description": "ID of the comment this attachment belongs to"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Whether the attachment has been deleted. Deleted attachments are returned for audit purposes but cannot be downloaded."
+          },
+          "filename": {
+            "type": "string",
+            "description": "Name of the attached file",
+            "pattern": "^[^\\\\/:*?<>|]*$",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "contentType": {
+            "type": "string",
+            "description": "MIME type of the attached file",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9][a-zA-Z0-9!#$&\\-\\^]*\\/[a-zA-Z0-9][a-zA-Z0-9!#$&\\-\\^]*$",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?([+-]\\d{2}:\\d{2}|Z)$",
+            "minLength": 19,
+            "maxLength": 29,
+            "description": "Timestamp when the attachment was created (ISO 8601, UTC)"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "description": "Pagination metadata for list responses",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Number of items skipped before starting to return results"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum number of items returned"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000,
+            "description": "Total number of items available"
+          }
+        }
+      },
+      "PaginatedListTickets": {
+        "type": "object",
+        "description": "Paginated list of tickets",
+        "required": [
+          "results",
+          "meta"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ticket"
+            },
+            "minItems": 0,
+            "maxItems": 1000,
+            "description": "Array of ticket objects"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta",
+            "description": "Pagination metadata"
+          }
+        }
+      },
+      "CloseTicketRequest": {
+        "type": "object",
+        "description": "Request body for closing a ticket",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65535,
+            "pattern": "^[\\s\\S]*$",
+            "description": "Optional comment to add when closing the ticket (maximum 65535 characters)"
+          }
+        }
+      },
+      "AddCommentRequest": {
+        "type": "object",
+        "description": "Request body for adding a comment to a ticket",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65535,
+            "pattern": "^[\\s\\S]*$",
+            "description": "The comment text to add (maximum 65535 characters)",
+            "examples": [
+              "We are currently investigating this issue."
+            ]
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "Represents a user (assignee or author)",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s\\-\\.,\\']*$",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s\\-\\.,\\']*$",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Last name of the user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            "minLength": 3,
+            "maxLength": 254,
+            "description": "Email address of the user"
+          }
+        }
+      },
+      "AttachmentURL": {
+        "type": "object",
+        "description": "Response containing a presigned URL for downloading an attachment",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://[^\\s/$.?#].[^\\s]*$",
+            "minLength": 10,
+            "maxLength": 2048,
+            "description": "Presigned URL for downloading the attachment (expires after a limited time)"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Error envelope; returned when we encounter an error",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "description": "Error code identifier",
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "description": "Detailed error description",
+            "type": "string",
+            "pattern": "^[\\s\\S]*$",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    },
+    "examples": {
+      "TicketOpenExample": {
+        "summary": "Example of an open ticket",
+        "value": {
+          "id": 12345,
+          "title": "Cannot log in",
+          "description": "User reports login failure",
+          "organizationUuid": "550e8400-e29b-41d4-a716-446655440000",
+          "status": "OPEN",
+          "assignee": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "agent@example.com"
+          },
+          "priority": "HIGH",
+          "type": "INCIDENT",
+          "createdAt": "2025-07-31T10:00:00Z",
+          "updatedAt": "2025-08-01T12:00:00Z",
+          "commentCount": 2,
+          "attachmentCount": 0
+        }
+      },
+      "TicketClosedExample": {
+        "summary": "Example of a closed ticket",
+        "value": {
+          "id": 12345,
+          "title": "Cannot log in",
+          "description": "User reports login failure",
+          "organizationUuid": "550e8400-e29b-41d4-a716-446655440000",
+          "status": "CLOSED",
+          "assignee": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "agent@example.com"
+          },
+          "priority": "HIGH",
+          "type": "INCIDENT",
+          "createdAt": "2025-07-31T10:00:00Z",
+          "updatedAt": "2025-08-01T12:30:00Z",
+          "commentCount": 3,
+          "attachmentCount": 0
+        }
+      },
+      "TicketListExample": {
+        "summary": "Example of a paginated ticket list",
+        "value": {
+          "results": [
+            {
+              "id": 12345,
+              "title": "Cannot log in",
+              "description": "User reports login failure",
+              "organizationUuid": "550e8400-e29b-41d4-a716-446655440000",
+              "status": "OPEN",
+              "assignee": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "agent@example.com"
+              },
+              "priority": "HIGH",
+              "type": "INCIDENT",
+              "createdAt": "2025-07-31T10:00:00Z",
+              "updatedAt": "2025-08-01T12:00:00Z",
+              "commentCount": 2,
+              "attachmentCount": 1,
+              "comments": [
+                {
+                  "id": 90001,
+                  "body": "Investigating the issue.",
+                  "author": {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "email": "agent@example.com"
+                  },
+                  "createdAt": "2025-08-01T11:00:00Z",
+                  "type": "PUBLIC"
+                }
+              ],
+              "attachments": [
+                {
+                  "id": 70001,
+                  "commentId": 90001,
+                  "deleted": false,
+                  "filename": "auth-log.txt",
+                  "contentType": "text/plain",
+                  "createdAt": "2025-08-01T11:01:00Z"
+                }
+              ]
+            }
+          ],
+          "meta": {
+            "offset": 0,
+            "limit": 20,
+            "total": 1
+          }
+        }
+      },
+      "CommentAddedExample": {
+        "summary": "Example of a comment added to a ticket",
+        "value": {
+          "id": 90002,
+          "body": "Thank you for reporting this issue. I've escalated it to our engineering team and will provide an update within 24 hours.",
+          "author": {
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "email": "agent@example.com"
+          },
+          "createdAt": "2026-03-04T14:30:00Z",
+          "type": "PUBLIC"
+        }
+      },
+      "AttachmentURLExample": {
+        "summary": "Example of a presigned URL for downloading an attachment",
+        "value": {
+          "url": "https://example-bucket.s3.amazonaws.com/path/to/file.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIAFAKEEXAMPLE%2F20260113%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260113T120000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        }
+      }
+    }
+  }
+}
