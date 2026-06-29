@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+
+environment.yml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Local secrets
+.env
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/

@@ -1,0 +1,1071 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Data Retrieval Service API",
+    "description": "The Data Retrieval Service (DRS) provides secure, authenticated access to observational data through predefined queries.\n\nThis API allows organizations to:\n- Discover available data sources\n- Query observational data using predefined queries optimized for common use cases\n- Retrieve schema information for data sources\n\nAll API requests require authentication via PAK (Personal Access key) bearer token.\n",
+    "version": "1.0.0-beta",
+    "contact": {
+      "name": "Arctic Wolf Networks",
+      "url": "https://docs.arcticwolf.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://data-retrieval-service-prod.managedgw.us001-prod.arcticwolf.net/",
+      "description": "Production server - US001"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/v1beta/organizations/{organizationID}/data-sources": {
+      "get": {
+        "summary": "List all data sources",
+        "description": "Returns a list of all available data sources for the organization",
+        "operationId": "listDataSources",
+        "tags": ["Data Sources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with list of data sources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataSource"
+                  }
+                },
+                "example": [
+                  {
+                    "name": "observations",
+                    "timeout": "30s"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1beta/organizations/{organizationID}/data-sources/{dataSource}": {
+      "get": {
+        "summary": "Get data source details",
+        "description": "Returns detailed information about a specific data source",
+        "operationId": "getDataSource",
+        "tags": ["Data Sources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          },
+          {
+            "$ref": "#/components/parameters/DataSource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with data source details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSource"
+                },
+                "example": {
+                  "name": "observations",
+                  "timeout": "30s"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1beta/organizations/{organizationID}/data-sources/{dataSource}/schema": {
+      "get": {
+        "summary": "Get data source schema",
+        "description": "Returns the schema definition for a specific data source, including all available fields and their types",
+        "operationId": "getDataSourceSchema",
+        "tags": ["Data Sources"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          },
+          {
+            "$ref": "#/components/parameters/DataSource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with schema details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSourceSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1beta/organizations/{organizationID}/data-sources/{dataSource}/predefined-queries": {
+      "get": {
+        "summary": "List predefined queries",
+        "description": "Returns a list of all predefined queries available for the specified data source. Predefined queries are optimized, tested queries for common use cases.\n",
+        "operationId": "listPredefinedQueries",
+        "tags": ["Predefined Queries"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          },
+          {
+            "$ref": "#/components/parameters/DataSource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with list of queries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListQueriesResponse"
+                },
+                "example": {
+                  "queries": [
+                    {
+                      "name": "observations-by-login-status",
+                      "description": "Find all observations based on login status"
+                    },
+                    {
+                      "name": "observations-by-ip-address",
+                      "description": "Find all observations related to a specific IP address"
+                    },
+                    {
+                      "name": "observations-by-user",
+                      "description": "Find all observations related to a specific user"
+                    },
+                    {
+                      "name": "observations-by-hostname",
+                      "description": "Find all observations related to a specific hostname"
+                    },
+                    {
+                      "name": "observations-by-domain",
+                      "description": "Find all observations related to a specific domain"
+                    },
+                    {
+                      "name": "observations-by-event-code",
+                      "description": "Find all observations by event code"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1beta/organizations/{organizationID}/data-sources/{dataSource}/predefined-queries/{queryId}": {
+      "get": {
+        "summary": "Describe a predefined query",
+        "description": "Returns detailed information about a specific predefined query including:\n- Input parameters and their types\n- Parameter constraints and validators\n- Result schema (available output fields)\n- Default columns returned if not specified\n",
+        "operationId": "describePredefinedQuery",
+        "tags": ["Predefined Queries"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          },
+          {
+            "$ref": "#/components/parameters/DataSource"
+          },
+          {
+            "$ref": "#/components/parameters/QueryID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with query details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredefinedQueryDescription"
+                },
+                "examples": {
+                  "observations-by-ip-address": {
+                    "summary": "Example query description for IP address search",
+                    "value": {
+                      "name": "observations-by-ip-address",
+                      "description": "Find all observations related to a specific IP address",
+                      "parameters": [
+                        {
+                          "name": "start_time",
+                          "type": "timestamp",
+                          "description": "The start of the query period (inclusive)",
+                          "mandatory": true,
+                          "default": null,
+                          "validators": [
+                            {
+                              "type": "iso_utc_timestamp"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "end_time",
+                          "type": "timestamp",
+                          "description": "The end of the query period (exclusive)",
+                          "mandatory": true,
+                          "default": null,
+                          "validators": [
+                            {
+                              "type": "iso_utc_timestamp"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "limit",
+                          "type": "integer",
+                          "description": "How many results to return in a page",
+                          "mandatory": false,
+                          "default": 100,
+                          "validators": [
+                            {
+                              "type": "positive"
+                            },
+                            {
+                              "type": "max",
+                              "parameter": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "offset",
+                          "type": "integer",
+                          "description": "Offset describing where to return the results from across pages",
+                          "mandatory": false,
+                          "default": 0,
+                          "validators": [
+                            {
+                              "type": "non_negative"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "ip_address",
+                          "type": "string",
+                          "description": "The IP address to search for in the observations",
+                          "mandatory": true,
+                          "canBeArray": true,
+                          "default": null,
+                          "validators": [
+                            {
+                              "type": "not_blank"
+                            },
+                            {
+                              "type": "max_length",
+                              "parameter": "4096"
+                            }
+                          ],
+                          "allowed_operators": ["eq", "in", "contains"]
+                        }
+                      ],
+                      "constraints": [
+                        {
+                          "type": "before",
+                          "parameters": ["start_time", "end_time"]
+                        }
+                      ],
+                      "default_columns": [
+                        {
+                          "name": "at_timestamp",
+                          "type": "date_time",
+                          "nullable": false,
+                          "description": "Date/time when the event originated"
+                        },
+                        {
+                          "name": "client.ip",
+                          "type": "string",
+                          "nullable": true,
+                          "description": "IP address of the client (IPv4 or IPv6)"
+                        },
+                        {
+                          "name": "client.port",
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Port number of the client"
+                        },
+                        {
+                          "name": "server.ip",
+                          "type": "string",
+                          "nullable": true,
+                          "description": "IP address of the server (IPv4 or IPv6)"
+                        },
+                        {
+                          "name": "server.port",
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Port number of the server"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1beta/organizations/{organizationID}/data-sources/{dataSource}/predefined-queries/{queryId}/execute": {
+      "post": {
+        "summary": "Execute a predefined query",
+        "description": "Executes a predefined query with the provided parameters and returns the results.\n\nFeatures:\n- Parameter validation against query definition\n- Support for comparison operators (equals, in, contains, etc.)\n- Optional column selection via response_columns\n- Automatic interval enforcement based on query configuration\n- SQL injection protection\n\nResults are returned as an array of rows, with column metadata included.\n",
+        "operationId": "executePredefinedQuery",
+        "tags": ["Predefined Queries"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrganizationID"
+          },
+          {
+            "$ref": "#/components/parameters/DataSource"
+          },
+          {
+            "$ref": "#/components/parameters/QueryID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteQueryRequest"
+              },
+              "examples": {
+                "observations-by-ip-address": {
+                  "summary": "Execute query by IP address",
+                  "value": {
+                    "parameters": [
+                      {
+                        "name": "start_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-01T00:00:00Z"
+                      },
+                      {
+                        "name": "end_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-02T00:00:00Z"
+                      },
+                      {
+                        "name": "ip_address",
+                        "comparisonOperator": "EQ",
+                        "value": "192.168.1.100"
+                      }
+                    ],
+                    "response_columns": ["at_timestamp", "client.ip", "server.ip"]
+                  }
+                },
+                "observations-by-multiple-ips": {
+                  "summary": "Execute query with multiple IP addresses using IN operator",
+                  "value": {
+                    "parameters": [
+                      {
+                        "name": "start_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-01T00:00:00Z"
+                      },
+                      {
+                        "name": "end_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-02T00:00:00Z"
+                      },
+                      {
+                        "name": "ip_address",
+                        "comparisonOperator": "IN",
+                        "value": ["192.168.1.100", "192.168.1.101", "10.0.0.5"]
+                      }
+                    ]
+                  }
+                },
+                "observations-by-hostname-contains": {
+                  "summary": "Execute query with CONTAINS operator",
+                  "value": {
+                    "parameters": [
+                      {
+                        "name": "start_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-01T00:00:00Z"
+                      },
+                      {
+                        "name": "end_time",
+                        "comparisonOperator": "EQ",
+                        "value": "2024-01-02T00:00:00Z"
+                      },
+                      {
+                        "name": "hostname",
+                        "comparisonOperator": "CONTAINS",
+                        "value": "server"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful query execution with results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryExecutionResponse"
+                },
+                "example": {
+                  "columns": [
+                    {
+                      "name": "at_timestamp",
+                      "type": "date_time"
+                    },
+                    {
+                      "name": "client.ip",
+                      "type": "string"
+                    },
+                    {
+                      "name": "server.ip",
+                      "type": "string"
+                    }
+                  ],
+                  "results": [
+                    ["2024-01-01T10:30:00Z", "192.168.1.100", "10.0.0.5"],
+                    ["2024-01-01T11:15:00Z", "192.168.1.100", "10.0.0.6"],
+                    ["2024-01-01T14:22:00Z", "192.168.1.100", "10.0.0.5"]
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "OrganizationID": {
+        "name": "organizationID",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the organization",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "example": "org-12345"
+      },
+      "DataSource": {
+        "name": "dataSource",
+        "in": "path",
+        "required": true,
+        "description": "The name of the data source",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "example": "observations"
+      },
+      "QueryID": {
+        "name": "queryId",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of the predefined query",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "example": "observations-by-ip-address"
+      }
+    },
+    "schemas": {
+      "DataSource": {
+        "type": "object",
+        "description": "Represents a data source containing queryable data",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique name identifier of the data source",
+            "example": "observations"
+          },
+          "timeout": {
+            "type": "string",
+            "description": "The query timeout duration for the data source",
+            "example": "30s"
+          }
+        },
+        "required": ["name", "timeout"]
+      },
+      "DataSourceSchema": {
+        "type": "object",
+        "description": "Schema definition for a data source, listing all available fields",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the schema",
+            "example": "observations"
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of fields available in the schema",
+            "items": {
+              "$ref": "#/components/schemas/SchemaField"
+            }
+          }
+        },
+        "required": ["name", "fields"]
+      },
+      "SchemaField": {
+        "type": "object",
+        "description": "A field in a data source schema",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the field (may use dot notation for nested fields)",
+            "example": "client.ip"
+          },
+          "type": {
+            "type": "string",
+            "description": "The data type of the field",
+            "enum": ["string", "date_time", "integer", "array_of_string", "array_of_integer"],
+            "example": "string"
+          },
+          "nullable": {
+            "type": "boolean",
+            "description": "Whether the field can contain null values",
+            "example": true
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of what the field contains",
+            "example": "IP address of the client (IPv4 or IPv6)"
+          }
+        },
+        "required": ["name", "type", "nullable"]
+      },
+      "ListQueriesResponse": {
+        "type": "object",
+        "description": "Response containing a list of available predefined queries",
+        "properties": {
+          "queries": {
+            "type": "array",
+            "description": "Array of available queries",
+            "items": {
+              "$ref": "#/components/schemas/ListQueryEntry"
+            }
+          }
+        },
+        "required": ["queries"]
+      },
+      "ListQueryEntry": {
+        "type": "object",
+        "description": "Summary information about a predefined query",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique identifier of the query",
+            "example": "observations-by-ip-address"
+          },
+          "description": {
+            "type": "string",
+            "description": "A human-readable description of what the query does",
+            "example": "Find all observations related to a specific IP address"
+          }
+        },
+        "required": ["name", "description"]
+      },
+      "QueryParameter": {
+        "type": "object",
+        "description": "Defines a parameter accepted by a predefined query",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the parameter",
+            "example": "ip_address"
+          },
+          "type": {
+            "type": "string",
+            "description": "The data type of the parameter",
+            "enum": ["string", "timestamp", "integer"],
+            "example": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the parameter and its usage",
+            "example": "The IP address to search for (IPv4 or IPv6)"
+          },
+          "mandatory": {
+            "type": "boolean",
+            "description": "Whether the parameter is required",
+            "example": true
+          },
+          "canBeArray": {
+            "type": "boolean",
+            "description": "Whether the parameter can accept an array of values (for use with 'in' operator)",
+            "example": true
+          },
+          "default": {
+            "description": "The default value for the parameter if not specified (null if no default)",
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ]
+          },
+          "validators": {
+            "type": "array",
+            "description": "List of validators applied to this parameter",
+            "items": {
+              "$ref": "#/components/schemas/ParameterValidator"
+            }
+          },
+          "allowed_operators": {
+            "type": "array",
+            "description": "List of comparison operators allowed for this parameter",
+            "items": {
+              "type": "string",
+              "enum": ["eq", "in", "contains"]
+            },
+            "example": ["eq", "in", "contains"]
+          }
+        },
+        "required": ["name", "type", "description", "mandatory", "canBeArray"]
+      },
+      "ParameterValidator": {
+        "type": "object",
+        "description": "A validation rule for a parameter",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of validator",
+            "example": "iso_utc_timestamp"
+          },
+          "parameter": {
+            "type": "string",
+            "description": "Configuration value for the validator (e.g., max value for 'max' validator, length for 'max_length')",
+            "nullable": true,
+            "example": "500"
+          }
+        },
+        "required": ["type"]
+      },
+      "ParameterConstraint": {
+        "type": "object",
+        "description": "A constraint that operates across multiple parameters simultaneously. Used to enforce relationships between parameters (e.g., start_time must be before end_time).\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of constraint",
+            "enum": ["before"],
+            "example": "before"
+          },
+          "parameters": {
+            "type": "array",
+            "description": "List of parameter names involved in this constraint (order matters for directional constraints)",
+            "items": {
+              "type": "string"
+            },
+            "example": ["start_time", "end_time"]
+          }
+        },
+        "required": ["type", "parameters"]
+      },
+      "PredefinedQueryDescription": {
+        "type": "object",
+        "description": "Complete description of a predefined query including parameters, constraints, and result schema",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The unique identifier of the query",
+            "example": "observations-by-ip-address"
+          },
+          "description": {
+            "type": "string",
+            "description": "A human-readable description of what the query does",
+            "example": "Find all observations related to a specific IP address"
+          },
+          "parameters": {
+            "type": "array",
+            "description": "List of parameters accepted by the query",
+            "items": {
+              "$ref": "#/components/schemas/QueryParameter"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "description": "List of cross-parameter constraints",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ParameterConstraint"
+            }
+          },
+          "default_columns": {
+            "type": "array",
+            "description": "Default columns returned if response_columns is not specified in the request",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SchemaField"
+            }
+          }
+        },
+        "required": ["name", "description", "parameters"]
+      },
+      "ExecuteQueryRequest": {
+        "type": "object",
+        "description": "Request body for executing a predefined query",
+        "properties": {
+          "parameters": {
+            "type": "array",
+            "description": "List of parameter values for the query",
+            "items": {
+              "$ref": "#/components/schemas/ExecuteQueryParameter"
+            }
+          },
+          "response_columns": {
+            "type": "array",
+            "description": "Optional list of column names to return. If not specified, default_return_columns from the query description will be returned. Cannot be empty if provided.\n",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            },
+            "example": ["at_timestamp", "client.ip", "server.ip"]
+          }
+        },
+        "required": ["parameters"]
+      },
+      "ExecuteQueryParameter": {
+        "type": "object",
+        "description": "A parameter value with comparison operator for query execution",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the parameter (must match a parameter in the query definition)",
+            "example": "ip_address"
+          },
+          "comparisonOperator": {
+            "type": "string",
+            "description": "The comparison operator to use (case-insensitive)",
+            "enum": ["EQ", "IN", "CONTAINS", "eq", "in", "contains"],
+            "default": null,
+            "example": "EQ"
+          },
+          "value": {
+            "description": "The value to compare against. Type must match the parameter definition. Can be an array if canBeArray is true and operator is 'in' or 'not in'.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ],
+            "example": "192.168.1.100"
+          }
+        },
+        "required": ["name", "comparisonOperator", "value"]
+      },
+      "QueryExecutionResponse": {
+        "type": "object",
+        "description": "Response from executing a predefined query",
+        "properties": {
+          "columns": {
+            "type": "array",
+            "description": "Metadata describing each column in the results",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/QueryColumn"
+            }
+          },
+          "results": {
+            "type": "array",
+            "description": "Array of result rows. Each row is an array of values corresponding to the columns. Values appear in the same order as the columns array.\n",
+            "items": {
+              "type": "array",
+              "description": "A single result row",
+              "items": {
+                "description": "Column value (type varies by column)",
+                "nullable": true
+              }
+            },
+            "example": [
+              ["2024-01-01T10:30:00Z", "192.168.1.100", "10.0.0.5"],
+              ["2024-01-01T11:15:00Z", "192.168.1.100", "10.0.0.6"]
+            ]
+          }
+        },
+        "required": ["results"]
+      },
+      "QueryColumn": {
+        "type": "object",
+        "description": "Metadata for a column in query results",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The column name",
+            "example": "client.ip"
+          },
+          "type": {
+            "type": "string",
+            "description": "The data type of the column",
+            "enum": ["string", "date_time", "integer", "array_of_string", "array_of_integer"],
+            "example": "string"
+          }
+        },
+        "required": ["name", "type"]
+      },
+      "ApiError": {
+        "type": "object",
+        "description": "Error response",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message describing what went wrong",
+            "example": "Invalid parameter value"
+          }
+        },
+        "required": ["error"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request - invalid input parameters or malformed request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            },
+            "examples": {
+              "invalid_parameter": {
+                "summary": "Invalid parameter value",
+                "value": {
+                  "error": "Invalid parameter value for 'ip_address': must be a valid IPv4 or IPv6 address"
+                }
+              },
+              "missing_required": {
+                "summary": "Missing required parameter",
+                "value": {
+                  "error": "Missing required parameter: start_time"
+                }
+              },
+              "invalid_id": {
+                "summary": "Invalid ID format",
+                "value": {
+                  "error": "Invalid organization ID: must contain only alphanumeric characters, hyphens, and underscores"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized - authentication required or invalid credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            },
+            "example": {
+              "error": "Authentication required"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden - insufficient permissions to access this resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            },
+            "example": {
+              "error": "Access denied: insufficient permissions for this organization"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found - the requested resource does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            },
+            "examples": {
+              "data_source_not_found": {
+                "summary": "Data source not found",
+                "value": {
+                  "error": "Data source not found"
+                }
+              },
+              "query_not_found": {
+                "summary": "Query not found",
+                "value": {
+                  "error": "Query not found"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal server error - an unexpected error occurred",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            },
+            "examples": {
+              "query_execution_error": {
+                "summary": "Query execution failed",
+                "value": {
+                  "error": "Query execution failed"
+                }
+              },
+              "generic_error": {
+                "summary": "Generic internal error",
+                "value": {
+                  "error": "Unable to process request"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "PAK",
+        "description": "PAK token for authentication. Obtain from Arctic Wolf authentication service."
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Data Sources",
+      "description": "Operations for discovering and querying data sources"
+    },
+    {
+      "name": "Predefined Queries",
+      "description": "Operations for listing, describing, and executing predefined queries"
+    }
+  ]
+}
