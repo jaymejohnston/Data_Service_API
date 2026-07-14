@@ -11,8 +11,8 @@
   },
   "servers": [
     {
-      "url": "https://data-retrieval-service-prod.managedgw.us001-prod.arcticwolf.net/",
-      "description": "Production server - US001"
+      "url": "https://<your-region-endpoint>.arcticwolf.net/",
+      "description": "Configured from your deployment environment"
     },
     {
       "url": "http://localhost:8080",
