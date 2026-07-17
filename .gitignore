@@ -16,6 +16,8 @@ environment.yml
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
 # IDEs
 .vscode/
