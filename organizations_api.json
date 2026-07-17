@@ -1,0 +1,225 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Organizations API",
+    "description": "This page contains documentation for querying the Organizations API.\n",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://eloc.global-prod.arcticwolf.net",
+      "description": "Organizations Host"
+    }
+  ],
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {
+    "/api/v1/organizations": {
+      "get": {
+        "summary": "Organization List API",
+        "operationId": "getOrganizations",
+        "x-aw-unauthenticated": true,
+        "parameters": [
+          {
+            "in": "query",
+            "name": "root",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of Organizations to which the current user is authorized. The list returned will be sorted, ascending by name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "default": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "OrganizationIdPathParam": {
+        "name": "organizationId",
+        "description": "The globally unique identifier for the organization (customer).",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "example": "422dbd5b-68fa-48d7-ac0f-4e42bc73a40a"
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Bad Request is thrown when the caller provides invalid input to an API.  A bad request could include a malformed path parameter, or a request body that failed a validation check (such as a JSON Schema validation error, or an expression validation error).\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Unauthorized is thrown when the API requires an authentication context and the caller did not provide such context. Given this is security error, no response body is specified to prevent an accidental information disclosure\n"
+      },
+      "ForbiddenError": {
+        "description": "Forbidden is thrown when the authenticated caller of the API has insufficient privileges to invoke the API. Given this is security error, no response body is specified to prevent an accidental information disclosure.\n"
+      },
+      "NotFoundError": {
+        "description": "Not Found is thrown when the caller requests a resource that does not exist in the repository, usually due to an invalid path parameter\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error is thrown when an unexpected error occurred while invoking the API.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ServiceUnavailableError": {
+        "description": "Service Unavailable Error is thrown when the server is not ready to handle the request or is down.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "required": [
+          "message",
+          "code"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "field",
+                "message"
+              ]
+            }
+          }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "required": [
+          "id",
+          "customerID",
+          "name",
+          "pod"
+        ],
+        "properties": {
+          "id": {
+            "description": "returns the ID of the organization",
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerID": {
+            "description": "This property returns the customer directory ID (eg. Baconsecurity)",
+            "type": "string"
+          },
+          "name": {
+            "description": "display name of the customer",
+            "type": "string"
+          },
+          "pod": {
+            "description": "the pod name",
+            "type": "string"
+          }
+        },
+        "example": {
+          "id": "422dbd5b-68fa-48d7-ac0f-4e42bc73a40b",
+          "customerID": "firefly",
+          "name": "Firefly",
+          "pod": "us001"
+        }
+      },
+      "OrganizationList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Organization"
+        },
+        "example": [
+          {
+            "id": "422dbd5b-68fa-48d7-ac0f-4e42bc73a40a",
+            "customerID": "awn",
+            "name": "Arctic Wolf Network",
+            "pod": "us001"
+          },
+          {
+            "id": "2c3ef37e-2142-14fc-9621-0242ac131202",
+            "name": "Bacon Security",
+            "customerID": "bacon",
+            "pod": "us002"
+          }
+        ]
+      },
+      "OrganizationID": {
+        "description": "the ID of an organization",
+        "type": "string"
+      }
+    }
+  }
+}
