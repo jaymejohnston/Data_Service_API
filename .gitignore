@@ -18,6 +18,8 @@ environment.yml
 .DS_Store
 .AppleDouble
 .LSOverride
+__MACOSX/
+**/__MACOSX/
 
 # IDEs
 .vscode/

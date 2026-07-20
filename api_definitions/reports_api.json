@@ -1,0 +1,1156 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Reports API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Mavericks",
+      "email": "mavericks@arcticwolf.com"
+    },
+    "description": "APIs for generating and retrieving reports.\n"
+  },
+  "servers": [
+    {
+      "url": "https://msp-reporting.managedgw.us001-prod.arcticwolf.net",
+      "description": "US001"
+    },
+    {
+      "url": "https://msp-reporting.managedgw.us002-prod.arcticwolf.net",
+      "description": "US002"
+    },
+    {
+      "url": "https://msp-reporting.managedgw.us003-prod.arcticwolf.net",
+      "description": "US003"
+    },
+    {
+      "url": "https://msp-reporting.managedgw.eu001-prod.arcticwolf.net",
+      "description": "EU001"
+    },
+    {
+      "url": "https://msp-reporting.managedgw.au001-prod.arcticwolf.net",
+      "description": "AU001"
+    },
+    {
+      "url": "https://msp-reporting.managedgw.ca001-prod.arcticwolf.net",
+      "description": "CA001"
+    }
+  ],
+  "paths": {
+    "/api/v1/organizations/{organizationUuid}/reports/configs": {
+      "get": {
+        "summary": "Get Generatable Report Configs",
+        "description": "Get list of all report types that can be generated with their configuration options",
+        "operationId": "getReportsConfig",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportType",
+            "schema": {
+              "$ref": "#/components/schemas/ReportType"
+            },
+            "description": "Filter by specific report type"
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "$ref": "#/components/schemas/Scope"
+            },
+            "description": "Filter by scope"
+          },
+          {
+            "in": "query",
+            "name": "fileFormat",
+            "schema": {
+              "$ref": "#/components/schemas/FileFormat"
+            },
+            "description": "Filter by file format"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "$ref": "#/components/schemas/ReportCategory"
+            },
+            "description": "Filter by report category"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Maximum number of configs to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Number of configs to skip for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportConfigList"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/reports": {
+      "get": {
+        "summary": "List All Reports",
+        "description": "Get all generated reports for the customer with optional filtering and pagination",
+        "operationId": "getCustomerReports",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reportType",
+            "schema": {
+              "$ref": "#/components/schemas/ReportType"
+            },
+            "description": "Filter by report type"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/ReportGenerationStatus"
+            },
+            "description": "Filter by report status"
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "$ref": "#/components/schemas/Scope"
+            },
+            "description": "Filter by report scope"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by report title"
+          },
+          {
+            "in": "query",
+            "name": "createdBy",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Filter by creator email"
+          },
+          {
+            "in": "query",
+            "name": "createdAfter",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Filter reports created after this date"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "reportType",
+                "status",
+                "title"
+              ],
+              "default": "createdAt"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            },
+            "description": "Sort order"
+          },
+                    {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Maximum number of reports to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Number of reports to skip for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportsList"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "Generate a Report",
+        "description": "Initiates generation of a report with specified configuration",
+        "operationId": "generateReport",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateReportRequest"
+              },
+              "examples": {
+                "schema": {
+                  "$ref": "#/components/examples/ReportGenerationRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Report generation initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportGenerationResponse"
+                },
+                "examples" : {
+                  "success": {
+                    "$ref": "#/components/examples/ReportStatusExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/NotAuthorised"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "409": {
+            "description": "Report generation already in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/reports/{reportUuid}/status": {
+      "get": {
+        "summary": "Get Report Status By ID",
+        "description": "Get status and metadata for a specific report generation request",
+        "operationId": "getReportStatus",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique report ID returned when generation was initiated"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportStatusDetail"
+                },
+                "examples": {
+                  "success": {
+                    "$ref": "#/components/examples/ReportStatusExample"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{organizationUuid}/reports/{reportUuid}/download": {
+      "get": {
+        "summary": "Download Report By ID",
+        "description": "Get pre-signed URL for the report by report ID (only works when status is AVAILABLE)",
+        "operationId": "getPresignedUrlByReportId",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "organizationUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reportUuid",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Report ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DownloadReport"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "ReportsList": {
+        "description": "Paginated list of reports",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReportsList"
+            },
+            "examples": {
+              "success": {
+                "$ref": "#/components/examples/ReportsExample"
+              }
+            }
+          }
+        }
+      },
+      "DownloadReport": {
+        "description": "Pre-signed URL for report download",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DownloadReport"
+            }
+          }
+        }
+      },
+      "ReportConfigList": {
+        "description": "Details of report configuration and status",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReportConfigList"
+            },
+            "examples": {
+              "success": {
+                "$ref": "#/components/examples/ReportsConfigExample"
+              }
+            }
+          }
+        }
+      },
+      "UnexpectedError": {
+        "description": "Unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Entity not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "organizationNotFound": {
+                "value": {
+                  "code": "not_found",
+                  "description": "Organization with UUID: 1234 not found."
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequestError": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "badRequest": {
+                "value": {
+                  "code": "invalid_request",
+                  "description": "The 'limit' parameter must be less than or equal to 100."
+                }
+              }
+            }
+          }
+        }
+      },
+      "ForbiddenError":{
+      "description": "User does not have the required access",
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/Error"
+          },
+          "examples": {
+            "forbidden": {
+              "value": {
+                "code": "forbidden",
+                "description": "User doesn't have proper access"
+              }
+            }
+          }
+        }
+        }
+      },
+      "NotAuthorised": {
+        "description": "User not authorised",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "notAuthorised": {
+                "value": {
+                  "code": "not_authorised",
+                  "description": "User not authorised to create report"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "internalError": {
+                "value": {
+                  "code": "internal_server_error",
+                  "description": "An unexpected error occurred while processing your request."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Error envelope; returned when we encounter an error",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "description": "Error code identifier",
+            "type": "string"
+          },
+          "description": {
+            "description": "Detailed error description",
+            "type": "string"
+          }
+        }
+      },
+      "ReportsList": {
+        "type": "object",
+        "description": "Paginated list of reports",
+        "required": [
+          "reports",
+          "pagination"
+        ],
+        "properties": {
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Report"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Total number of reports matching the filter"
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Number of results per page"
+              },
+              "offset": {
+                "type": "integer",
+                "description": "Current offset"
+              }
+            }
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "description": "Details of report",
+        "required": [
+          "reportUuid",
+          "reportType",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "reportUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the report"
+          },
+          "reportType": {
+            "$ref": "#/components/schemas/ReportType"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title of the report"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Generated filename"
+          },
+          "period": {
+            "$ref": "#/components/schemas/ReportingPeriod"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportGenerationStatus"
+          },
+          "fileFormat": {
+            "$ref": "#/components/schemas/FileFormat"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who created/requested the report"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the report generation was requested"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the report will be deleted from S3"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Error information if status is FAILED",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "ReportConfigList": {
+        "type": "object",
+        "description": "Paginated list of report configurations",
+        "required": [
+          "reportConfigs",
+          "pagination"
+        ],
+        "properties": {
+          "reportConfigs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportConfig"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Total number of report configs"
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Number of results per page"
+              },
+              "offset": {
+                "type": "integer",
+                "description": "Current offset"
+              }
+            }
+          }
+        }
+      },
+      "ReportConfig": {
+        "type": "object",
+        "description": "Report configuration and capabilities",
+        "required": [
+          "reportType",
+          "title",
+          "availableScopes",
+          "availablePeriods",
+          "availableFormats"
+        ],
+        "properties": {
+          "reportType": {
+            "$ref": "#/components/schemas/ReportType"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable report name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed report description"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ReportCategory"
+          },
+          "availableScopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            },
+            "description": "Supported scopes for this report type"
+          },
+          "availablePeriods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportingPeriod"
+            },
+            "description": "Supported period types"
+          },
+          "availableFormats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileFormat"
+            },
+            "description": "Supported file formats for this report"
+          }
+        }
+      },
+      "DownloadReport": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "url"
+          }
+        }
+      },
+      "ReportingPeriod": {
+        "type": "object",
+        "description": "Defines the time period for the report",
+        "required": [
+          "periodType"
+        ],
+        "properties": {
+          "periodType": {
+            "type": "string",
+            "enum": [
+              "LAST_MONTH",
+              "LAST_7_DAYS",
+              "LAST_30_DAYS",
+              "LAST_60_DAYS",
+              "LAST_90_DAYS",
+              "LAST_N_DAYS",
+              "LAST_N_MONTHS",
+              "LAST_WEEK",
+              "CURRENT_MONTH",
+              "CURRENT_QUARTER",
+              "CURRENT_YEAR",
+              "ALL_TIME",
+              "CUSTOM_RANGE"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Required when periodType is LAST_N_DAYS or LAST_N_MONTHS (e.g., 45, 6). Ignored for other period types."
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Start date/time. Required when periodType is CUSTOM_RANGE."
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "End date/time. Required when periodType is CUSTOM_RANGE."
+          }
+        }
+      },
+      "GenerateReportRequest": {
+        "type": "object",
+        "required": [
+          "reportType",
+          "period",
+          "scope",
+          "fileFormat"
+        ],
+        "properties": {
+          "reportType": {
+            "$ref": "#/components/schemas/ReportType"
+          },
+          "period": {
+            "$ref": "#/components/schemas/ReportingPeriod"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "fileFormat": {
+            "$ref": "#/components/schemas/FileFormat"
+          }
+        }
+      },
+      "ReportGenerationResponse": {
+        "type": "object",
+        "description": "Response when a report generation is initiated",
+        "required": [
+          "reportUuid",
+          "reportType",
+          "status",
+          "requestedAt"
+        ],
+        "properties": {
+          "reportUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the report - use this to check status and download"
+          },
+          "reportType": {
+            "$ref": "#/components/schemas/ReportType"
+          },
+          "title": {
+            "type": "string",
+            "description": "Report title"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportGenerationStatus"
+          },
+          "period": {
+            "$ref": "#/components/schemas/ReportingPeriod"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "fileFormat": {
+            "$ref": "#/components/schemas/FileFormat"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the generation was requested"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who requested the report"
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to check the status of this report generation"
+          }
+        }
+      },
+        "ReportStatusDetail": {
+        "type": "object",
+        "description": "Detailed status information for a report generation request",
+        "required": [
+          "reportUuid",
+          "reportType",
+          "status",
+          "requestedAt",
+          "requestedBy"
+        ],
+        "properties": {
+          "reportUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the report"
+          },
+          "reportType": {
+            "$ref": "#/components/schemas/ReportType"
+          },
+          "title": {
+            "type": "string",
+            "description": "Report title"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportGenerationStatus"
+          },
+          "period": {
+            "$ref": "#/components/schemas/ReportingPeriod"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "fileFormat": {
+            "$ref": "#/components/schemas/FileFormat"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the report generation was requested"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who requested the report"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When report generation completed"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the report will expire and be deleted from S3"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Error details if status is FAILED",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "retryable": {
+                "type": "boolean",
+                "description": "Whether the report generation can be retried"
+              }
+            }
+          }
+        }
+      },
+      "Scope": {
+        "type": "string",
+        "enum": [
+          "TENANT",
+          "AGGREGATE"
+        ]
+      },
+      "ReportCategory": {
+        "type": "string",
+        "description": "Report category for grouping and filtering",
+        "enum": [
+          "EXECUTIVE_REPORTS",
+          "MSA_CSV_REPORTS"
+        ]
+      },
+      "ReportType": {
+        "type": "string",
+        "enum": [
+          "MONTHLY_EXECUTIVE_TICKET_SUMMARY",
+          "FULL_SESSION_HISTORY",
+          "MANAGER_DASHBOARD",
+          "USER_DASHBOARD",
+          "INCOMPLETE_SESSIONS",
+          "INCOMPLETE_REMEDIATIONS",
+          "LOW_SCORING_USERS",
+          "PHISHING_FAILURES",
+          "ACTIVE_USER_LIST",
+          "FULL_COMPLIANCE_HISTORY",
+          "INCOMPLETE_COMPLIANCE_SESSIONS"
+        ]
+      },
+      "FileFormat": {
+        "type": "string",
+        "enum": [
+          "PDF",
+          "CSV"
+        ]
+      },
+      "ReportGenerationStatus": {
+        "type": "string",
+        "description": "Status of a report generation request",
+        "enum": [
+          "QUEUED",
+          "GENERATING",
+          "AVAILABLE",
+          "FAILED"
+        ]
+      }
+    },
+    "examples": {
+      "ReportsExample": {
+        "summary": "Example of paginated reports list",
+        "value": {
+          "reports": [
+            {
+              "reportUuid": "123e4567-e89b-12d3-a456-426614174000",
+              "reportType": "MONTHLY_EXECUTIVE_TICKET_SUMMARY",
+              "title": "Monthly Executive Ticket Summary",
+              "filename": "Monthly_Executive_Ticket_Summary_2026-01_a1b2c3d4.pdf",
+              "period": {
+                "periodType": "LAST_MONTH",
+                "startDate": "2026-01-01T00:00:00Z",
+                "endDate": "2026-01-31T23:59:59Z"
+              },
+              "scope": "TENANT",
+              "status": "AVAILABLE",
+              "fileFormat": "PDF",
+              "createdBy": "agent@example.com",
+              "createdAt": "2026-02-15T10:00:00Z",
+              "expiresAt": null,
+              "errorDetails": null
+            }
+          ],
+          "pagination": {
+            "total": 1,
+            "limit": 50,
+            "offset": 0
+          }
+        }
+      },
+      "ReportsConfigExample": {
+        "summary": "Example of report configurations (configuration-only, no status)",
+        "value": {
+          "reportConfigs": [
+            {
+              "reportType": "MONTHLY_EXECUTIVE_TICKET_SUMMARY",
+              "title": "Monthly Executive Ticket Summary",
+              "description": "Comprehensive monthly summary of ticket activity, trends, and key metrics for executive review",
+              "category": "EXECUTIVE_REPORTS",
+              "availableScopes": [
+                "TENANT",
+                "AGGREGATE"
+              ],
+              "availablePeriods": [
+                "LAST_MONTH"
+              ],
+              "availableFormats": [
+                "PDF"
+              ]
+            }
+          ],
+          "pagination": {
+            "total": 1,
+            "limit": 50,
+            "offset": 0
+          }
+        }
+      },
+      "ReportStatusExample": {
+        "summary": "Example of report status detail",
+        "value": {
+          "reportUuid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "reportType": "MONTHLY_EXECUTIVE_TICKET_SUMMARY",
+          "title": "Monthly Executive Ticket Summary",
+          "status": "QUEUED",
+          "period": {
+            "periodType": "LAST_MONTH",
+            "startDate": "2026-01-01T00:00:00Z",
+            "endDate": "2026-01-31T23:59:59Z"
+          },
+          "scope": "TENANT",
+          "format": "PDF",
+          "requestedAt": "2026-02-27T08:11:42Z",
+          "requestedBy": "user@example.com",
+          "generatedAt": "2026-02-27T08:15:42Z",
+          "expiresAt": null,
+          "error": null
+        }
+      }, 
+      "ReportGenerationRequestExample" : {
+        "summary": "Example of report generation request body",
+        "value": {
+            "reportType": "MONTHLY_EXECUTIVE_TICKET_SUMMARY",
+            "period": {
+              "periodType": "LAST_MONTH"
+            },
+            "scope": "TENANT",
+            "fileFormat": "PDF"
+        }
+      }
+    }
+  }
+}
