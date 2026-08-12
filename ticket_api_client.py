@@ -4,12 +4,40 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Callable, Iterable, List, Optional
 import os
+import re
 import requests
 import time
 
 from api_url_utils import resolve_api_base_url
+from organizations_client import OrganizationInfo, resolve_organization
+
+# The Ticket API's organizationUuid path parameter is declared as `format: uuid`
+# in its OpenAPI spec. Validate against that shape at the point of use so a
+# pasted URL, customerID, or other wrong value fails fast with a clear message
+# instead of a cryptic error from the gateway.
+_UUID_PATTERN = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+
+
+def _validate_organization_uuid(organization_uuid: Optional[str]) -> str:
+    if not organization_uuid:
+        raise ValueError(
+            "organization_uuid is required - pass it explicitly, or construct the "
+            "client with ArcticWolfTicketApiClient.from_pak(...) to resolve it "
+            "automatically from your PAK."
+        )
+    if not _UUID_PATTERN.match(organization_uuid):
+        raise ValueError(
+            f"organization_uuid={organization_uuid!r} is invalid — it must be a UUID "
+            "(e.g. 'cbcfa21a-42e5-4087-849d-7a97cbcc10a5'), not a URL, customerID, or "
+            "other value. This is the 'id' field from the Organizations API response, "
+            "not 'customerID'. Consider using "
+            "ArcticWolfTicketApiClient.from_pak(pak_token) to resolve this automatically."
+        )
+    return organization_uuid
 
 
 @dataclass
@@ -48,6 +76,7 @@ class ArcticWolfTicketApiClient:
         timeout_seconds: int = 30,
         max_retries: int = 3,
         pod: str | None = None,
+        organization_uuid: str | None = None,
     ) -> None:
         """Initialize the Ticket API client.
 
@@ -57,6 +86,9 @@ class ArcticWolfTicketApiClient:
             timeout_seconds: Request timeout in seconds
             max_retries: Number of retry attempts for transient errors
             pod: Deployment POD used to derive the regional host when no base URL is provided
+            organization_uuid: Default organization UUID to use when a method call
+                omits it. Prefer building the client with from_pak(...) instead of
+                setting this by hand - see _validate_organization_uuid for why.
         """
         resolved_base_url = base_url or os.getenv("DATA_RETRIEVAL_SERVICE_URL")
         if not resolved_base_url:
@@ -70,6 +102,7 @@ class ArcticWolfTicketApiClient:
         self.base_url = resolved_base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
+        self.organization_uuid = organization_uuid
         if not token:
             token = os.getenv("PAK_TOKEN", "")
         self.session = requests.Session()
@@ -79,6 +112,50 @@ class ArcticWolfTicketApiClient:
             "Content-Type": "application/json",
             "User-Agent": "aw-ticket-api-client/1.0",
         })
+
+    @classmethod
+    def from_pak(
+        cls,
+        pak_token: str,
+        *,
+        organization_uuid: Optional[str] = None,
+        pod: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout_seconds: int = 30,
+        max_retries: int = 3,
+        on_multiple_organizations: Optional[Callable[[List[OrganizationInfo]], OrganizationInfo]] = None,
+    ) -> "ArcticWolfTicketApiClient":
+        """Build a client by resolving the organization directly from the PAK.
+
+        Calls the Organizations API with the PAK to discover which organization(s)
+        it can access, instead of requiring organization_uuid to be configured by
+        hand (easy to get wrong - see _validate_organization_uuid above).
+
+        - If the PAK maps to exactly one organization, it's used automatically.
+        - If it maps to more than one (MSP / parent-company PAKs), pass either
+          organization_uuid explicitly or on_multiple_organizations - a callback
+          that receives the list of OrganizationInfo and returns the one to use
+          (e.g. organizations_client.prompt_for_organization_choice). Otherwise
+          this raises OrganizationResolutionError rather than guessing.
+
+        The resolved UUID is stored as the returned client's `organization_uuid`,
+        so subsequent calls can omit it.
+        """
+        selected = resolve_organization(
+            pak_token,
+            key="id",
+            value=organization_uuid,
+            on_multiple_organizations=on_multiple_organizations,
+        )
+
+        return cls(
+            base_url=base_url,
+            token=pak_token,
+            timeout_seconds=timeout_seconds,
+            max_retries=max_retries,
+            pod=pod or selected.pod,
+            organization_uuid=selected.id,
+        )
 
     @staticmethod
     def _normalize_params(params: dict[str, Any] | None) -> dict[str, Any]:
@@ -176,6 +253,7 @@ class ArcticWolfTicketApiClient:
         include_comments: bool = False,
     ) -> dict[str, Any]:
         """List tickets for an organization with optional filters."""
+        organization_uuid = _validate_organization_uuid(organization_uuid)
         path = f"/api/v1/organizations/{organization_uuid}/tickets"
         params = {
             "status": status,
@@ -202,6 +280,7 @@ class ArcticWolfTicketApiClient:
         include_comments: bool = False,
     ) -> dict[str, Any]:
         """Retrieve a single ticket by ID."""
+        organization_uuid = _validate_organization_uuid(organization_uuid)
         path = f"/api/v1/organizations/{organization_uuid}/tickets/{ticket_id}"
         return self._request("GET", path, params={"includeComments": include_comments})
 
@@ -212,6 +291,7 @@ class ArcticWolfTicketApiClient:
         body: str,
     ) -> dict[str, Any]:
         """Add a public comment to a ticket."""
+        organization_uuid = _validate_organization_uuid(organization_uuid)
         path = f"/api/v1/organizations/{organization_uuid}/tickets/{ticket_id}/comments"
         return self._request("POST", path, json_body={"body": body})
 
@@ -222,6 +302,7 @@ class ArcticWolfTicketApiClient:
         comment: str | None = None,
     ) -> dict[str, Any]:
         """Close a ticket with optional closing comment."""
+        organization_uuid = _validate_organization_uuid(organization_uuid)
         path = f"/api/v1/organizations/{organization_uuid}/tickets/{ticket_id}/close"
         json_body = {"comment": comment} if comment else {}
         return self._request("POST", path, json_body=json_body)
@@ -233,5 +314,6 @@ class ArcticWolfTicketApiClient:
         attachment_id: int,
     ) -> dict[str, Any]:
         """Get a pre-signed download URL for an attachment."""
+        organization_uuid = _validate_organization_uuid(organization_uuid)
         path = f"/api/v1/organizations/{organization_uuid}/tickets/{ticket_id}/attachments/{attachment_id}"
         return self._request("GET", path)

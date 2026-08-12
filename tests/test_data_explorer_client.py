@@ -38,7 +38,7 @@ def _mock_organizations_response(orgs):
     return response
 
 
-@patch("data_explorer_client.requests.get")
+@patch("organizations_client.requests.get")
 def test_from_pak_auto_resolves_single_organization(mock_get):
     mock_get.return_value = _mock_organizations_response(
         [{"id": "uuid-1", "customerID": "samplecollp", "name": "Sample Co Llp", "pod": "us001"}]
@@ -53,7 +53,7 @@ def test_from_pak_auto_resolves_single_organization(mock_get):
     assert kwargs["headers"]["Authorization"] == "Bearer token"
 
 
-@patch("data_explorer_client.requests.get")
+@patch("organizations_client.requests.get")
 def test_from_pak_requires_selection_for_multiple_organizations(mock_get):
     mock_get.return_value = _mock_organizations_response(
         [
@@ -66,7 +66,7 @@ def test_from_pak_requires_selection_for_multiple_organizations(mock_get):
         ApiConfig.from_pak(pak_token="token")
 
 
-@patch("data_explorer_client.requests.get")
+@patch("organizations_client.requests.get")
 def test_from_pak_uses_on_multiple_organizations_callback(mock_get):
     mock_get.return_value = _mock_organizations_response(
         [
@@ -84,7 +84,7 @@ def test_from_pak_uses_on_multiple_organizations_callback(mock_get):
     assert config.pod == "us002"
 
 
-@patch("data_explorer_client.requests.get")
+@patch("organizations_client.requests.get")
 def test_from_pak_rejects_explicit_organization_id_not_in_list(mock_get):
     mock_get.return_value = _mock_organizations_response(
         [{"id": "uuid-1", "customerID": "orga", "name": "Org A", "pod": "us001"}]
@@ -94,7 +94,7 @@ def test_from_pak_rejects_explicit_organization_id_not_in_list(mock_get):
         ApiConfig.from_pak(pak_token="token", organization_id="not-orga")
 
 
-@patch("data_explorer_client.requests.get")
+@patch("organizations_client.requests.get")
 def test_from_pak_raises_on_non_200_response(mock_get):
     response = Mock()
     response.status_code = 401

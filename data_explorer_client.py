@@ -12,76 +12,20 @@ import json
 import time
 
 from api_url_utils import resolve_api_base_url
-
-# Default host for the Organizations API. Used to resolve organization_id/pod
-# directly from a PAK instead of requiring them to be configured by hand.
-ORGANIZATIONS_API_DEFAULT_URL = "https://eloc.global-prod.arcticwolf.net/api/v1/organizations"
+from organizations_client import (
+    OrganizationInfo,
+    OrganizationResolutionError,
+    OrganizationsApiError,
+    fetch_organizations,
+    prompt_for_organization_choice,
+    resolve_organization,
+)
 
 # organizationID path segments may only contain letters, numbers, underscores, and
 # hyphens (see the Data Retrieval API docs). Reject anything else - e.g. a URL or a
 # UUID with slashes/colons pasted into the wrong config value - at construction
 # time instead of surfacing as a cryptic 403 from the gateway three calls later.
 _ORGANIZATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
-
-
-@dataclass(frozen=True)
-class OrganizationInfo:
-    """A single organization returned by the Organizations API for a PAK."""
-    id: str
-    customer_id: str
-    name: str
-    pod: str
-
-
-class OrganizationResolutionError(Exception):
-    """Raised when the organization for a PAK can't be unambiguously resolved."""
-
-
-def fetch_organizations(
-    pak_token: str,
-    organizations_api_url: Optional[str] = None,
-    timeout: int = 30,
-) -> List[OrganizationInfo]:
-    """Call the Organizations API and return the organizations this PAK can access."""
-    url = (
-        organizations_api_url
-        or os.getenv("ORGANIZATIONS_API_URL")
-        or ORGANIZATIONS_API_DEFAULT_URL
-    )
-    response = requests.get(
-        url,
-        headers={"Authorization": f"Bearer {pak_token}", "Accept": "application/json"},
-        timeout=timeout,
-    )
-    if response.status_code != 200:
-        raise DataExplorerError(
-            status_code=response.status_code,
-            message="Failed to resolve organization from PAK via the Organizations API",
-            response_text=response.text[:200],
-        )
-
-    return [
-        OrganizationInfo(
-            id=org.get("id", ""),
-            customer_id=org.get("customerID", ""),
-            name=org.get("name", ""),
-            pod=org.get("pod", ""),
-        )
-        for org in response.json()
-    ]
-
-
-def prompt_for_organization_choice(organizations: List[OrganizationInfo]) -> OrganizationInfo:
-    """Interactively prompt the user to pick one organization (for notebook/CLI use)."""
-    print(f"This PAK has access to {len(organizations)} organizations:")
-    for i, org in enumerate(organizations, start=1):
-        print(f"  {i}. {org.customer_id} — {org.name} (pod={org.pod})")
-
-    while True:
-        choice = input(f"Select an organization [1-{len(organizations)}]: ").strip()
-        if choice.isdigit() and 1 <= int(choice) <= len(organizations):
-            return organizations[int(choice) - 1]
-        print("Invalid selection, try again.")
 
 
 @dataclass
@@ -167,38 +111,12 @@ class ApiConfig:
           prompt_for_organization_choice for an interactive prompt). Otherwise this raises
           OrganizationResolutionError rather than silently guessing which org to query.
         """
-        organizations = fetch_organizations(pak_token)
-
-        if not organizations:
-            raise OrganizationResolutionError(
-                "This PAK is not associated with any organization. Check that it hasn't "
-                "expired and was created from the Unified Portal (not the MSP portal)."
-            )
-
-        if organization_id:
-            selected = next(
-                (org for org in organizations if org.customer_id == organization_id),
-                None,
-            )
-            if not selected:
-                available = ", ".join(org.customer_id for org in organizations)
-                raise OrganizationResolutionError(
-                    f"organization_id={organization_id!r} is not among the organizations "
-                    f"this PAK can access: {available}"
-                )
-        elif len(organizations) == 1:
-            selected = organizations[0]
-        elif on_multiple_organizations:
-            selected = on_multiple_organizations(organizations)
-        else:
-            available = "\n".join(
-                f"  - {org.customer_id} ({org.name}, pod={org.pod})" for org in organizations
-            )
-            raise OrganizationResolutionError(
-                "This PAK has access to multiple organizations. Pass organization_id "
-                "explicitly, or pass on_multiple_organizations to choose interactively "
-                f"(e.g. prompt_for_organization_choice). Available organizations:\n{available}"
-            )
+        selected = resolve_organization(
+            pak_token,
+            key="customer_id",
+            value=organization_id,
+            on_multiple_organizations=on_multiple_organizations,
+        )
 
         return cls(
             organization_id=selected.customer_id,

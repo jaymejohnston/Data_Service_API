@@ -15,6 +15,30 @@ Reusable client for the Arctic Wolf Ticket API with the following features:
 
 #### Usage
 
+Recommended: resolve the organization directly from the PAK instead of configuring
+`organization_uuid` by hand (a URL or the wrong Organizations API field pasted in
+here otherwise surfaces as a confusing error several calls later):
+
+```python
+from ticket_api_client import ArcticWolfTicketApiClient, TicketApiError
+from organizations_client import prompt_for_organization_choice
+
+# Auto-resolves when the PAK maps to exactly one organization. If it maps to
+# more than one (MSP/parent-company PAKs), pass organization_uuid explicitly
+# or on_multiple_organizations to choose interactively/programmatically.
+client = ArcticWolfTicketApiClient.from_pak(
+    pak_token="your_bearer_token",
+    on_multiple_organizations=prompt_for_organization_choice,
+)
+
+# organization_uuid no longer needs to be passed to each call below - it's
+# stored on the client - but you can still override it per-call if needed.
+tickets = client.list_tickets(client.organization_uuid, limit=50)
+```
+
+Manual configuration is still supported if you already know the organization UUID
+(the Organizations API's `id` field, not `customerID`) and POD/base URL:
+
 ```python
 from ticket_api_client import ArcticWolfTicketApiClient, TicketApiError
 
@@ -69,15 +93,20 @@ Reusable client for the Arctic Wolf Data Retrieval Service API with the followin
 
 #### Usage
 
+Recommended: resolve the organization directly from the PAK instead of configuring
+`organization_id` by hand:
+
 ```python
-from data_explorer_client import DataExplorerClient, ApiConfig
+from data_explorer_client import ApiConfig, DataExplorerClient
+from organizations_client import prompt_for_organization_choice
 from datetime import datetime, timedelta, timezone
 
-# Configure
-config = ApiConfig(
-    base_url="https://api.arcticwolf.com",
-    organization_id="your-org-id",
-    pak_token="your_pak_token"
+# Auto-resolves when the PAK maps to exactly one organization. If it maps to
+# more than one (MSP/parent-company PAKs), pass organization_id explicitly
+# or on_multiple_organizations to choose interactively/programmatically.
+config = ApiConfig.from_pak(
+    pak_token="your_pak_token",
+    on_multiple_organizations=prompt_for_organization_choice,
 )
 
 client = DataExplorerClient(config)
