@@ -1,0 +1,8 @@
+# Runtime dependencies for the API clients (data_explorer_client.py,
+# ticket_api_client.py, organizations_client.py) and getting-started notebooks.
+requests>=2.31
+pandas>=2.0
+python-dotenv>=1.0
+
+# Test suite (tests/)
+pytest>=7.4
