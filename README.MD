@@ -5,5 +5,5 @@
 - Tickets API: https://docs.arcticwolf.com/en/developer-and-oem/ticket-api/arctic-wolf-ticket-api
 
 # Juniper Environment
-- Python 3.9.6
-- No additional python modules loaded - use native python for any code
+- Python 3.14.6
+- Py Modules in requirements.txt
